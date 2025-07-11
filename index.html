@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Story of King Manasseh: An Interactive Study</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Forest & Sand -->
+    <!-- Application Structure Plan: A thematic, single-page narrative designed for interactive exploration. The structure progresses from Manasseh's wickedness to his repentance and legacy, now augmented with a dedicated "Study Assistant" section for LLM-powered deeper dives. Interactive cards, a dynamic timeline, and toggleable content manage information density. A sticky navigation bar allows for both linear scrolling and non-linear access to key sections. This structure was chosen to transform the linear lesson plan into an engaging digital story, encouraging user interaction and discovery, which is more effective for an advanced audience than a static text document. -->
+    <!-- Visualization & Content Choices: 1. Manasseh's Sins: Interactive Cards (HTML/JS) - Goal: Organize/Inform. Breaks down a long list of sins into digestible, user-initiated chunks. 2. Repentance Timeline: Vertical Timeline (HTML/JS) - Goal: Show Change/Process. Visually represents the sequence from capture to restoration, making the narrative climax clear. 3. Reforms/Archaeology: Toggleable Cards (HTML/JS) - Goal: Organize/Layer Info. Presents core biblical reforms first, with archaeological evidence as an optional layer for deeper study, preventing information overload. 4. Legacy Chart: Bar Chart (Chart.js) - Goal: Compare. Provides a stark visual contrast between Manasseh's positive personal outcome and the negative national consequences, summarizing a key theological point effectively. 5. Application Questions: Accordion (HTML/JS) - Goal: Engage. Keeps the final section clean and allows users to reflect on questions one by one. 6. Personal Reflection Prompt Generator (LLM): Button (HTML/JS) - Goal: Engage/Apply. Dynamically generates new reflection questions, fostering deeper personal application. 7. Study Assistant (LLM): Input/Button/Display (HTML/JS) - Goal: Inform/Explore. Allows users to get quick, contextual explanations of terms, enhancing understanding. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #F5F5DC; /* Beige */
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Tinos', serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-item {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-item.active {
+            color: #3CB371; /* Medium Sea Green */
+            border-bottom-color: #3CB371;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3CB371;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#F5F5DC] text-[#2F4F4F]">
+
+    <header id="header" class="bg-[#F5F5DC]/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-[#2F4F4F] font-display">King Manasseh</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#descent" class="nav-item text-[#6B8E23] hover:text-[#3CB371] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">The Descent</a>
+                        <a href="#depths" class="nav-item text-[#6B8E23] hover:text-[#3CB371] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">The Depths</a>
+                        <a href="#restoration" class="nav-item text-[#6B8E23] hover:text-[#3CB371] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">The Restoration</a>
+                        <a href="#legacy" class="nav-item text-[#6B8E23] hover:text-[#3CB371] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">The Legacy</a>
+                        <a href="#study-assistant" class="nav-item text-[#6B8E23] hover:text-[#3CB371] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Study Assistant</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section id="hero" class="text-center py-16 sm:py-20 lg:py-24">
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2F4F4F] font-display">God's Unfailing Mercy</h2>
+            <p class="mt-4 text-lg sm:text-xl max-w-3xl mx-auto text-[#6B8E23]">The story of King Manasseh is one of the Bible's most dramatic accounts of sin and redemption. It poses a profound question: Is any sin so great that it falls outside the boundless mercy of God? Explore the journey of a king who descended into darkness and found astonishing grace.</p>
+        </section>
+
+        <div class="space-y-24 sm:space-y-32">
+        
+            <section id="descent">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-[#2F4F4F] font-display">The Descent into Wickedness</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-[#6B8E23]">Manasseh inherited a reformed kingdom from his godly father, Hezekiah, but chose a path of radical rebellion, leading Judah into unprecedented levels of sin.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div id="sin-card-container" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    </div>
+                    
+                    <div id="sin-details" class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 font-display text-[#2E8B57]">The Depths of Sin</h3>
+                        <div id="sin-details-content" class="text-[#2F4F4F] space-y-4">
+                            <p>Click on a category to the left to explore the specific sins of Manasseh as recorded in Scripture.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="depths">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-[#2F4F4F] font-display">The Depths of Repentance</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-[#6B8E23]">After decades of rebellion, God's judgment brought Manasseh to a place of utter desperation. It was from the depths of a Babylonian prison that he finally turned back to God.</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="w-full md:w-1/3">
+                        <div id="timeline-container" class="relative pl-0">
+                            <div class="absolute left-3.5 top-0 h-full w-0.5 bg-[#90EE90]"></div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-lg">
+                         <h3 class="text-2xl font-bold mb-2 font-display text-[#2E8B57]">A Humble Cry</h3>
+                        <p class="text-sm text-[#6B8E23] mb-4">2 Chronicles 33:12-13</p>
+                        <div id="timeline-details-content" class="text-[#2F4F4F] space-y-4 italic text-lg leading-relaxed">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="restoration">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-[#2F4F4F] font-display">The Fruits of Restoration</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-[#6B8E23]">True repentance produces tangible change. After God restored him to his kingdom, Manasseh took bold steps to reverse the damage he had done and honor the God who had forgiven him.</p>
+                     <div class="mt-6">
+                        <div id="toggle-buttons" class="inline-flex rounded-md shadow-sm">
+                        </div>
+                     </div>
+                </div>
+                <div id="restoration-card-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+
+            <section id="legacy">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-[#2F4F4F] font-display">A Complicated Legacy</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-[#6B8E23]">Manasseh's story is a powerful testament to God's forgiveness, but it also presents a sobering truth: forgiveness does not always erase the consequences of our sin.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 font-display">Personal vs. National Outcome</h3>
+                        <p class="text-[#6B8E23] mb-4">The chart illustrates the stark contrast between Manasseh's personal restoration and the lasting negative impact on his nation and family. His repentance saved him, but it couldn't undo the generational damage.</p>
+                        <div class="chart-container">
+                            <canvas id="legacyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 font-display">Lessons for Today</h3>
+                        <p class="text-[#6B8E23] mb-4">Manasseh's life prompts us to reflect on sin, mercy, and repentance in our own lives. Click on the questions below to consider their application.</p>
+                        <div id="accordion-container" class="space-y-2">
+                        </div>
+                        <button id="generateReflectionBtn" class="mt-6 w-full bg-[#3CB371] hover:bg-[#2E8B57] text-white font-bold py-3 px-4 rounded-md transition-colors flex items-center justify-center">
+                            ✨ Generate New Reflection Prompt
+                            <span id="reflectionSpinner" class="loading-spinner hidden"></span>
+                        </button>
+                        <div id="reflectionOutput" class="mt-4 p-4 bg-[#FAFAD2] rounded-lg text-[#2F4F4F] italic hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="study-assistant">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-[#2F4F4F] font-display">Study Assistant</h2>
+                    <p class="mt-3 max-w-2xl mx-auto text-[#6B8E23]">Need a quick explanation of a term or concept related to the Bible study? Enter your query below and get an instant insight.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
+                    <h3 class="text-2xl font-bold mb-4 font-display text-[#2E8B57]">Ask the Assistant</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <input type="text" id="assistantInput" placeholder="e.g., 'Asherah pole' or 'kenosis'" class="flex-grow p-3 border border-[#D2B48C] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3CB371]">
+                        <button id="askAssistantBtn" class="bg-[#3CB371] hover:bg-[#2E8B57] text-white font-bold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
+                            ✨ Get Explanation
+                            <span id="assistantSpinner" class="loading-spinner hidden"></span>
+                        </button>
+                    </div>
+                    <div id="assistantOutput" class="p-4 bg-[#FAFAD2] rounded-lg text-[#2F4F4F] hidden">
+                        <p>Your explanation will appear here.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="bg-[#2F4F4F] text-[#D2B48C] mt-24 sm:mt-32">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p>Life of King Manasseh based on 2 Kings 21 & 2 Chronicles 33.</p>
+            <p class="text-sm text-[#6B8E23] mt-2">Designed and Made by Jenmark Muyot.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const content = {
+                sins: [
+                    { id: 'idolatry', title: 'State-Sponsored Idolatry', icon: '🛐', details: "Manasseh rebuilt the 'high places' his father had destroyed and erected altars for Baal and an Asherah pole, promoting foreign worship throughout Judah.", scripture: "2 Kings 21:3" },
+                    { id: 'defilement', title: 'Defiling the Temple', icon: '🏛️', details: "He built altars to pagan gods and 'all the starry hosts' within the two courts of the Lord's own Temple in Jerusalem, the place God had chosen for His Name.", scripture: "2 Chronicles 33:4-5" },
+                    { id: 'occult', title: 'Occult Practices', icon: '🔮', details: "He practiced divination, sought omens, and consulted mediums and spiritists, engaging in practices explicitly forbidden by God's law.", scripture: "2 Kings 21:6" },
+                    { id: 'violence', title: 'Child Sacrifice & Violence', icon: '🩸', details: "He sacrificed his own son in the fire and 'shed so much innocent blood that he filled Jerusalem from end to end,' likely murdering God's prophets and righteous citizens.", scripture: "2 Kings 21:6, 16" }
+                ],
+                timeline: [
+                    { id: 'capture', title: 'Capture & Exile', details: "God sent the Assyrian army, who 'captured Manasseh with hooks and bound him with chains of bronze and brought him to Babylon.' This was the consequence of his unheeded rebellion." },
+                    { id: 'humbling', title: 'Humbling & Prayer', details: "'In his distress he sought the favor of the Lord his God and humbled himself greatly before the God of his ancestors. And when he prayed to him...'" },
+                    { id: 'restoration', title: 'Restoration & Knowledge', details: "'...the Lord was moved by his entreaty and listened to his plea; so he brought him back to Jerusalem and to his kingdom. Then Manasseh knew that the Lord is God.'" },
+                ],
+                restoration: {
+                    reforms: [
+                        { title: 'Cleansing the Temple', details: "He got rid of the foreign gods and removed the idolatrous image from the temple of the Lord.", icon: '🏛️' },
+                        { title: 'Destroying Pagan Altars', details: "He threw out all the altars he had built on the temple hill and in Jerusalem.", icon: '🔥' },
+                        { title: 'Restoring True Worship', details: "He restored the altar of the Lord and sacrificed fellowship and thank offerings, telling Judah to serve the God of Israel.", icon: '📖' }
+                    ],
+                    archaeology: [
+                        { title: 'The Seal of Manasseh', details: "Seals inscribed 'Belonging to Manasseh, son of the king' have been found, providing tangible evidence of his existence and royal status.", icon: '📜' },
+                        { title: 'Assyrian Records', details: "Manasseh is named in Assyrian inscriptions from kings Esarhaddon and Ashurbanipal as a vassal king, confirming his place in wider ancient history.", icon: '🗿' },
+                        { title: 'Administrative Evidence', details: "Stamped jar handles ('LMLK' seals) show a complex tax system during his reign, necessary to pay tribute to Assyria, corroborating the political context of his rule.", icon: '🏺' }
+                    ]
+                },
+                accordion: [
+                    { q: "What does Manasseh's story teach about the nature of God's mercy?", a: "It challenges any human-made limits on forgiveness. God's mercy extends even to the most wicked, demonstrating that it is boundless, radical, and always available to the genuinely repentant heart." },
+                    { q: "What does it mean to 'humble oneself greatly' today?", a: "It means more than just feeling sorry. It involves a deep acknowledgment of our sin before God, abandoning pride, submitting fully to His authority, and desperately seeking His favor above all else." },
+                    { q: "How can we distinguish true repentance from mere regret?", a: "Regret is sorrow over consequences. True repentance, as seen in Manasseh, is sorrow over the sin itself and results in a changed life. It's an active turning away from sin and a turning towards God, producing 'fruit' like restitution and a new direction." },
+                    { q: "How does the reality of 'enduring consequences' affect our walk with God?", a: "It underscores the seriousness of sin. While we are personally forgiven, our actions can have lasting negative impacts on others. This should motivate us to live wisely and righteously, considering the ripple effects of our choices on our families and communities." },
+                ]
+            };
+            
+            const sinCardContainer = document.getElementById('sin-card-container');
+            const sinDetailsContent = document.getElementById('sin-details-content');
+            
+            content.sins.forEach(sin => {
+                const card = document.createElement('div');
+                card.className = 'card bg-white p-6 rounded-lg shadow-md cursor-pointer flex items-center space-x-4';
+                card.innerHTML = `<div class="text-4xl">${sin.icon}</div><div><h4 class="text-xl font-bold font-display">${sin.title}</h4><p class="text-sm text-[#6B8E23]">Click to see details</p></div>`;
+                card.addEventListener('click', () => {
+                    sinDetailsContent.innerHTML = `<p>${sin.details}</p><p class="text-sm text-[#6B8E23] mt-2 font-semibold">Reference: ${sin.scripture}</p>`;
+                });
+                sinCardContainer.appendChild(card);
+            });
+
+            const timelineContainer = document.getElementById('timeline-container');
+            const timelineDetailsContent = document.getElementById('timeline-details-content');
+            
+            timelineContainer.innerHTML = '<div class="absolute left-3.5 top-0 h-full w-0.5 bg-[#90EE90]"></div>'; /* Light Green */
+            content.timeline.forEach((step, index) => {
+                const item = document.createElement('div');
+                item.className = 'relative mb-8 cursor-pointer group';
+                item.innerHTML = `
+                    <div class="absolute left-[-1.5rem] top-1.5 w-7 h-7 bg-white border-2 border-[#90EE90] rounded-full group-hover:bg-[#3CB371] transition-colors"></div>
+                    <div class="ml-10">
+                        <h4 class="text-lg font-bold text-[#2F4F4F] group-hover:text-[#2E8B57] transition-colors">${step.title}</h4>
+                    </div>
+                `;
+                 item.addEventListener('click', () => {
+                    timelineDetailsContent.innerHTML = `"${step.details}"`;
+                });
+                timelineContainer.appendChild(item);
+            });
+            timelineDetailsContent.innerHTML = `"${content.timeline[0].details}"`;
+
+            const restorationCardContainer = document.getElementById('restoration-card-container');
+            const toggleButtons = document.getElementById('toggle-buttons');
+            let currentView = 'reforms';
+
+            function renderRestorationCards() {
+                restorationCardContainer.innerHTML = '';
+                content.restoration[currentView].forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center';
+                    card.innerHTML = `<div class="text-5xl mb-4">${item.icon}</div><h4 class="text-xl font-bold font-display mb-2">${item.title}</h4><p class="text-[#6B8E23]">${item.details}</p>`;
+                    restorationCardContainer.appendChild(card);
+                });
+            }
+
+            const reformButton = document.createElement('button');
+            reformButton.textContent = 'Biblical Reforms';
+            reformButton.className = 'px-4 py-2 text-sm font-medium border border-[#D2B48C]'; /* Tan */
+            reformButton.addEventListener('click', () => {
+                currentView = 'reforms';
+                renderRestorationCards();
+                updateToggleButtons();
+            });
+
+            const archButton = document.createElement('button');
+            archButton.textContent = 'Archaeological Evidence';
+            archButton.className = 'px-4 py-2 text-sm font-medium border border-[#D2B48C]'; /* Tan */
+            archButton.addEventListener('click', () => {
+                currentView = 'archaeology';
+                renderRestorationCards();
+                updateToggleButtons();
+            });
+            
+            toggleButtons.appendChild(reformButton);
+            toggleButtons.appendChild(archButton);
+            
+            function updateToggleButtons() {
+                reformButton.className = `px-4 py-2 text-sm font-medium border border-[#D2B48C] rounded-l-md ${currentView === 'reforms' ? 'bg-[#3CB371] text-white' : 'bg-white text-[#2F4F4F]'}`; /* Medium Sea Green */
+                archButton.className = `px-4 py-2 text-sm font-medium border border-[#D2B48C] rounded-r-md ${currentView === 'archaeology' ? 'bg-[#3CB371] text-white' : 'bg-white text-[#2F4F4F]'}`; /* Medium Sea Green */
+            }
+
+            renderRestorationCards();
+            updateToggleButtons();
+
+            const accordionContainer = document.getElementById('accordion-container');
+            content.accordion.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'border-b border-[#FAFAD2]'; /* Light Goldenrod Yellow */
+                wrapper.innerHTML = `
+                    <button class="w-full flex justify-between items-center text-left p-4 hover:bg-[#FAFAD2] transition">
+                        <span class="font-bold text-[#2F4F4F]">${item.q}</span>
+                        <span class="text-[#3CB371] text-2xl font-light transform transition-transform">+</span>
+                    </button>
+                    <div class="p-4 bg-[#FAFAD2] text-[#6B8E23] hidden">
+                        ${item.a}
+                    </div>
+                `;
+                const button = wrapper.querySelector('button');
+                const contentDiv = wrapper.querySelector('div');
+                const icon = wrapper.querySelector('span:last-child');
+                button.addEventListener('click', () => {
+                    const isHidden = contentDiv.classList.contains('hidden');
+                    contentDiv.classList.toggle('hidden');
+                    icon.textContent = isHidden ? '−' : '+';
+                    icon.classList.toggle('rotate-45', !isHidden);
+                });
+                accordionContainer.appendChild(wrapper);
+            });
+
+            const legacyCtx = document.getElementById('legacyChart').getContext('2d');
+            new Chart(legacyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Personal Outcome', 'National Outcome'],
+                    datasets: [{
+                        label: 'Legacy Impact',
+                        data: [10, -8],
+                        backgroundColor: [
+                            'rgba(144, 238, 144, 0.6)', /* Light Green */
+                            'rgba(210, 180, 140, 0.6)'  /* Tan */
+                        ],
+                        borderColor: [
+                            'rgba(60, 179, 113, 1)', /* Medium Sea Green */
+                            'rgba(107, 142, 35, 1)'   /* Olive Drab */
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { display: false },
+                            grid: { display: false }
+                        },
+                        y: {
+                            grid: { display: false },
+                             ticks: { font: { size: 14 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.raw > 0) return 'Forgiven and Restored by God.';
+                                    return 'Damage to the nation and his family persisted.';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // LLM Integration for Reflection Prompt
+            const generateReflectionBtn = document.getElementById('generateReflectionBtn');
+            const reflectionOutput = document.getElementById('reflectionOutput');
+            const reflectionSpinner = document.getElementById('reflectionSpinner');
+
+            generateReflectionBtn.addEventListener('click', async () => {
+                reflectionOutput.classList.add('hidden');
+                reflectionSpinner.classList.remove('hidden');
+                generateReflectionBtn.disabled = true;
+
+                const prompt = "Generate a single, unique, thought-provoking personal reflection question for an advanced Bible study group, based on the story of King Manasseh's sin, repentance, and the enduring consequences of his actions. Focus on themes of personal responsibility, the depth of God's mercy, and the nature of true repentance. The question should encourage self-examination regarding areas where repentance might be needed. Keep it concise.";
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        reflectionOutput.textContent = text;
+                        reflectionOutput.classList.remove('hidden');
+                    } else {
+                        reflectionOutput.textContent = "Could not generate a reflection prompt. Please try again.";
+                        reflectionOutput.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error generating reflection prompt:", error);
+                    reflectionOutput.textContent = "Failed to generate prompt due to an error. Please try again later.";
+                    reflectionOutput.classList.remove('hidden');
+                } finally {
+                    reflectionSpinner.classList.add('hidden');
+                    generateReflectionBtn.disabled = false;
+                }
+            });
+
+            // LLM Integration for Study Assistant
+            const assistantInput = document.getElementById('assistantInput');
+            const askAssistantBtn = document.getElementById('askAssistantBtn');
+            const assistantOutput = document.getElementById('assistantOutput');
+            const assistantSpinner = document.getElementById('assistantSpinner');
+
+            askAssistantBtn.addEventListener('click', async () => {
+                const query = assistantInput.value.trim();
+                if (!query) {
+                    assistantOutput.textContent = "Please enter a term to explain.";
+                    assistantOutput.classList.remove('hidden');
+                    return;
+                }
+
+                assistantOutput.classList.add('hidden');
+                assistantSpinner.classList.remove('hidden');
+                askAssistantBtn.disabled = true;
+
+                const prompt = `Provide a concise, biblical explanation for the term or concept "${query}" in the context of Old Testament history or the story of King Manasseh. If the term is not directly related to Manasseh or general Old Testament context, provide a general biblical explanation. Keep it to 2-3 sentences.`;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        assistantOutput.textContent = text;
+                        assistantOutput.classList.remove('hidden');
+                    } else {
+                        assistantOutput.textContent = "Could not find an explanation for that term. Please try a different query.";
+                        assistantOutput.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error asking assistant:", error);
+                    assistantOutput.textContent = "Failed to get explanation due to an error. Please try again later.";
+                    assistantOutput.classList.remove('hidden');
+                } finally {
+                    assistantSpinner.classList.add('hidden');
+                    askAssistantBtn.disabled = false;
+                }
+            });
+
+
+            const sections = document.querySelectorAll('section');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navItems.forEach(item => {
+                            if (item.getAttribute('href').substring(1) === entry.target.id) {
+                                item.classList.add('active');
+                            } else {
+                                item.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
